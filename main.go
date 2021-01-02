@@ -9,52 +9,13 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"unicode"
 
+	"./src/struct/StationTree"
+
 	"github.com/inahym196/gojaconv/jaconv"
 )
-
-type Word struct {
-	Kanji string
-	Hira  string
-	Vowel string
-}
-
-type StationTree struct {
-	Len          int
-	CurrentVowel string
-	WordList     []Word
-	ChildTree    map[string]*StationTree
-}
-
-func NewStationTree(length int, vowel string) *StationTree {
-	var tree = new(StationTree)
-	if matched, _ := regexp.MatchString(`[yt]`, vowel); matched {
-		tree.Len = length
-	} else {
-		tree.Len = length + 1
-	}
-	tree.CurrentVowel = vowel
-	tree.ChildTree = map[string]*StationTree{}
-	return tree
-}
-
-func (tree StationTree) addChildTree(vowel string, nextTree *StationTree) {
-	tree.ChildTree[vowel] = nextTree
-}
-
-func (tree *StationTree) addWordList(word Word) {
-	(*tree).WordList = append((*tree).WordList, word)
-}
-
-func (tree StationTree) getChildTree(vowel string) (*StationTree, bool) {
-	if childTree, ok := tree.ChildTree[vowel]; ok {
-		return childTree, true
-	}
-	return NewStationTree(0, ""), false
-}
 
 func OpenReadFile(filename string) io.ReadCloser {
 	fp, err := os.OpenFile(filename, os.O_RDONLY, 0666)
@@ -131,57 +92,10 @@ func TextToCsv(readfile, writefile string) {
 		kanji, hira := ExtractText(scanner.Text() /*, gomiFp*/)
 		if kanji != "" {
 			vowel := jaconv.ToHebon(hira)
-			len := len(vowel) - strings.Count(vowel, "y") - strings.Count(vowel, "t")
+			len := len(vowel) //- strings.Count(vowel, "y") - strings.Count(vowel, "t")
 			fmt.Fprintf(writeFp, "%v,%v,%v,%v\n", kanji, hira, vowel, len)
 		}
 	}
-}
-
-func GrowTree(reader *csv.Reader, writer io.Writer) {
-	var RootTree = NewStationTree(0, "")
-
-	for i := 0; ; i++ {
-		record, err := reader.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			panic(err)
-		}
-		if i < 0 {
-			continue
-		}
-
-		word := Word{
-			Kanji: string(record[0]),
-			Hira:  string(record[1]),
-			Vowel: string(record[2]),
-		}
-		wordLen, _ := strconv.Atoi(record[3])
-		//fmt.Printf("\n%#v\n", word)
-
-		var currentTree = RootTree
-		for l := 0; l < wordLen; l++ {
-			var currentVowel = word.Vowel[l : l+1]
-			var totalVowel = word.Vowel[:l+1]
-			var childTree, ok = currentTree.getChildTree(currentVowel)
-			if ok {
-				//fmt.Printf("%v-tree is exist. move it.\n", totalVowel)
-				currentTree = childTree
-			} else {
-				//fmt.Printf("%v-tree is not exist. create it.\n", totalVowel)
-				var nextTree = NewStationTree(l, totalVowel)
-				currentTree.addChildTree(currentVowel, nextTree)
-				currentTree = nextTree
-			}
-		}
-		currentTree.addWordList(word)
-	}
-	jsonData, err := json.MarshalIndent(RootTree, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Fprintf(writer, "%v", string(jsonData))
 }
 
 func CsvToJson(readfile, writefile string) {
@@ -192,7 +106,25 @@ func CsvToJson(readfile, writefile string) {
 	writeFp := OpenWriteFile(writefile)
 	defer writeFp.Close()
 
-	GrowTree(reader, writeFp)
+	var RootTree = StationTree.NewStationTree(0, "")
+	for debug := 0; ; debug++ {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			panic(err)
+		}
+		if debug < 0 {
+			continue
+		}
+		RootTree.GrowTree(record)
+	}
+	jsonData, err := json.MarshalIndent(RootTree, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintf(writeFp, "%v", string(jsonData))
 }
 
 func main() {
