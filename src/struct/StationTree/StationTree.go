@@ -10,7 +10,7 @@ import (
 type StationTree struct {
 	Len          int
 	CurrentVowel string
-	WordList     []Word.Word
+	WordList     *[]Word.Word
 	ChildTree    map[string]*StationTree
 }
 
@@ -32,7 +32,9 @@ func (tree *StationTree) addChildTree(vowel string, nextTree *StationTree) {
 }
 
 func (tree *StationTree) addWordList(word Word.Word) {
-	(*tree).WordList = append((*tree).WordList, word)
+	var WordList *[]Word.Word = new([]Word.Word)
+	*WordList = append(*WordList, word)
+	(*tree).WordList = WordList
 }
 
 func (tree *StationTree) getChildTree(vowel string) (*StationTree, bool) {
