@@ -29,6 +29,33 @@ type StationTree struct {
 	ChildTree    map[string]*StationTree
 }
 
+func NewStationTree(length int, vowel string) *StationTree {
+	var tree = new(StationTree)
+	if matched, _ := regexp.MatchString(`[yt]`, vowel); matched {
+		tree.Len = length
+	} else {
+		tree.Len = length + 1
+	}
+	tree.CurrentVowel = vowel
+	tree.ChildTree = map[string]*StationTree{}
+	return tree
+}
+
+func (tree StationTree) addChildTree(vowel string, nextTree *StationTree) {
+	tree.ChildTree[vowel] = nextTree
+}
+
+func (tree *StationTree) addWordList(word Word) {
+	(*tree).WordList = append((*tree).WordList, word)
+}
+
+func (tree StationTree) getChildTree(vowel string) (*StationTree, bool) {
+	if childTree, ok := tree.ChildTree[vowel]; ok {
+		return childTree, true
+	}
+	return NewStationTree(0, ""), false
+}
+
 func OpenReadFile(filename string) io.ReadCloser {
 	fp, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
@@ -65,12 +92,6 @@ func ExtractText(rawText string /*, gomifp io.WriteCloser*/) (string, string) {
 		if matchHira != nil {
 			return matchKanji[1], KanaToHira(matchHira[1])
 		}
-
-		/*
-			if matched, _ := regexp.MatchString(`岩城`, rawText); matched {
-							println(rawText, hiraSubText, matchKanji[1], KanaToHira(matchHira[1]))
-						}
-		*/
 		//fmt.Fprintf(gomifp, "raw: %v\nsub: %v\tkanji: %v\n\n", rawText, hiraSubText, matchKanji[1])
 	}
 	//fmt.Fprintf(gomifp, "raw: %v\n", rawText)
@@ -117,10 +138,9 @@ func TextToCsv(readfile, writefile string) {
 }
 
 func GrowTree(reader *csv.Reader, writer io.Writer) {
-	var RootTree *StationTree = new(StationTree)
-	RootTree.ChildTree = map[string]*StationTree{}
+	var RootTree = NewStationTree(0, "")
 
-	for i := 0; i < 10000; i++ {
+	for i := 0; ; i++ {
 		record, err := reader.Read()
 		if err == io.EOF {
 			break
@@ -141,44 +161,21 @@ func GrowTree(reader *csv.Reader, writer io.Writer) {
 		//fmt.Printf("\n%#v\n", word)
 
 		var currentTree = RootTree
-		var currentVowel = word.Vowel[0:1]
-		var totalVowel = word.Vowel[0:1]
-		var vowelSize = 1
-		var smallVowelCount int
-		var regSmallVowel = regexp.MustCompile(`[yt]`)
 		for l := 0; l < wordLen; l++ {
-			matchSmallVowel := regSmallVowel.MatchString(word.Vowel[l : l+1])
-			if matchSmallVowel == true {
-				vowelSize = 2
-			} else {
-				vowelSize = 1
-			}
-			currentVowel = word.Vowel[l : l+vowelSize]
-			totalVowel = word.Vowel[:l+vowelSize]
-			if _, ok := (*currentTree).ChildTree[currentVowel]; ok {
+			var currentVowel = word.Vowel[l : l+1]
+			var totalVowel = word.Vowel[:l+1]
+			var childTree, ok = currentTree.getChildTree(currentVowel)
+			if ok {
 				//fmt.Printf("%v-tree is exist. move it.\n", totalVowel)
-				currentTree = (*currentTree).ChildTree[currentVowel]
+				currentTree = childTree
 			} else {
 				//fmt.Printf("%v-tree is not exist. create it.\n", totalVowel)
-				var nextTree = new(StationTree)
-				nextTree.Len = l + 1 - smallVowelCount
-				nextTree.CurrentVowel = totalVowel
-				nextTree.ChildTree = map[string]*StationTree{}
-				(*currentTree).ChildTree[currentVowel] = nextTree
-				//fmt.Printf("%#v\n\n", (*currentTree))
+				var nextTree = NewStationTree(l, totalVowel)
+				currentTree.addChildTree(currentVowel, nextTree)
 				currentTree = nextTree
 			}
-
-			if vowelSize == 2 {
-				l++
-				smallVowelCount++
-			}
-
 		}
-		//matchSmallVowel := regSmallVowel.MatchString(currentTree.CurrentVowel[wordLen : wordLen])
-		//if matchSmallVowel == true {
-		currentTree.WordList = append(currentTree.WordList, word)
-		//}
+		currentTree.addWordList(word)
 	}
 	jsonData, err := json.MarshalIndent(RootTree, "", "  ")
 	if err != nil {
