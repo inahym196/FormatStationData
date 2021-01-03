@@ -10,7 +10,7 @@ import (
 type StationTree struct {
 	Len          int
 	CurrentVowel string
-	WordList     *[]Word.Word
+	WordList     *Word.WordList
 	ChildTree    map[string]*StationTree
 }
 
@@ -32,7 +32,7 @@ func (tree *StationTree) addChildTree(vowel string, nextTree *StationTree) {
 }
 
 func (tree *StationTree) addWordList(word Word.Word) {
-	var WordList *[]Word.Word = new([]Word.Word)
+	var WordList *Word.WordList = new(Word.WordList)
 	*WordList = append(*WordList, word)
 	(*tree).WordList = WordList
 }
@@ -50,19 +50,22 @@ func (RootTree *StationTree) GrowTree(record []string) {
 		Hira:  string(record[1]),
 		Vowel: string(record[2]),
 	}
-	wordLen, _ := strconv.Atoi(record[3])
+	var wordLen, _ = strconv.Atoi(record[3])
 	var currentTree = RootTree
 	for l := 0; l < wordLen; l++ {
-		var currentVowel = word.Vowel[l : l+1]
+		//var currentVowel = word.Vowel[l : l+1]
+		var currentSyllable, syllableLen = word.GetSyllable(l)
+		l += syllableLen - 1
 		var totalVowel = word.Vowel[:l+1]
-		var childTree, ok = currentTree.getChildTree(currentVowel)
+
+		var childTree, ok = currentTree.getChildTree(currentSyllable)
 		if ok {
-			//fmt.Printf("%v-tree is exist. move it. last word is %v.\n", totalVowel, currentVowel)
+			//fmt.Printf("%v-tree is exist. move it. last word is %v.\n", totalVowel, currentSyllable)
 			currentTree = childTree
 		} else {
-			//fmt.Printf("%v-tree is not exist. create and move it. last word is %v.\n", totalVowel, currentVowel)
+			//fmt.Printf("%v-tree is not exist. create and move it. last word is %v.\n", totalVowel, currentSyllable)
 			var nextTree = NewStationTree(l, totalVowel)
-			currentTree.addChildTree(currentVowel, nextTree)
+			currentTree.addChildTree(currentSyllable, nextTree)
 			currentTree = nextTree
 		}
 	}
