@@ -107,7 +107,7 @@ func CsvToJson(readfile, writefile string) {
 	defer writeFp.Close()
 
 	var RootTree = StationTree.NewStationTree(0, "")
-	for debug := 0; debug < 5; debug++ {
+	for debug := 0; ; /*debug < 10*/ debug++ {
 		record, err := reader.Read()
 		if err == io.EOF {
 			break
