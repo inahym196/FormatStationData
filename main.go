@@ -97,19 +97,6 @@ func TextToCsv(readfile, writefile string) {
 		}
 	}
 }
-
-/*
-func ReadJson(filename string) (jsonData *StationTree.StationTree) {
-	bytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := json.Unmarshal(bytes, &jsonData); err != nil {
-		log.Fatal(err)
-	}
-	return jsonData
-}
-*/
 func CsvToJson(readfile, writefile string) {
 	readFp := OpenReadFile(readfile)
 	defer readFp.Close()
@@ -119,7 +106,7 @@ func CsvToJson(readfile, writefile string) {
 	defer writeFp.Close()
 
 	var RootTree = StationTree.NewStationTree(nil)
-	for debug := 0; debug < 5; debug++ {
+	for debug := 0; debug < 10000; debug++ {
 		record, err := reader.Read()
 		if err == io.EOF {
 			break
@@ -137,11 +124,6 @@ func CsvToJson(readfile, writefile string) {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(writeFp, "%v", string(jsonData))
-
-	/*
-		var jsonTest = ReadJson("datalist.json")
-		fmt.Printf("%v", jsonTest)
-	*/
 }
 
 func main() {

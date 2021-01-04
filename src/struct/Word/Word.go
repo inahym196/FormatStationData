@@ -1,31 +1,14 @@
 package word
 
-import (
-	"../mora"
-)
-
 type WordList []Word
 type Word struct {
 	Kanji string
 	Hira  string
-	Moras *mora.Moras
 }
 
-func NewWord(kanji, hira, vowel string) (w *Word) {
-	return &Word{kanji, hira, mora.ToMoras(vowel)}
+func NewWord(kanji, hira string) (w *Word) {
+	return &Word{kanji, hira}
 }
-
-func (w *Word) GetMora(len int) (*mora.Mora, int) {
-	var m = (*w).Moras.Get(len)
-	return m, m.Len()
-}
-
-/*
-func (w *Word) FormerMora(len int) *mora.Moras {
-	var ms = (*w).Moras.Former(len)
-	return ms
-}
-*/
 
 func NewWordList() (wl *WordList) {
 	return &WordList{}

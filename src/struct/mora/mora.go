@@ -31,8 +31,8 @@ func (ms *Moras) Get(l int) (m *Mora) {
 	return &(*ms)[l]
 }
 
-func (ms Moras) String() (str string) {
-	for _, m := range ms {
+func (ms *Moras) String() (str string) {
+	for _, m := range *ms {
 		str += fmt.Sprintf("%v", m)
 	}
 	return str
@@ -46,7 +46,7 @@ func ToMoras(s string) *Moras {
 		//fmt.Printf("i is %v. l is %v.\n", i, l)
 		if matched, _ := regexp.MatchString(`^ty`, s); matched {
 			m = toMora(s[i : i+3])
-		} else if matched, _ = regexp.MatchString(`^[ty]`, s); matched {
+		} else if matched, _ = regexp.MatchString(`^[ty]$`, s); matched {
 			m = toMora(s[i : i+2])
 		} else {
 			//fmt.Printf("else. s[%v:%v]=%v\n", i, i+1, s[i:i+1])

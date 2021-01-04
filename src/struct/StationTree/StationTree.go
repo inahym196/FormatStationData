@@ -61,21 +61,21 @@ func (tree *StationTree) String() (str string) {
 
 func (RootTree *StationTree) GrowTree(record []string) {
 
-	var word = word.NewWord(record[0], record[1], record[2])
-	//fmt.Printf("inputWord : %v\n", word)
+	var word = word.NewWord(record[0], record[1])
+	var moras = mora.ToMoras(record[2])
 	var wordLen, _ = strconv.Atoi(record[3])
 	var currentTree = RootTree
-	var currentMoras = mora.NewMoras()
 	for l := 0; l < wordLen; l++ {
-		var currentMora, moraLen = word.GetMora(l)
-		currentMoras.Add(currentMora)
+		var currentMora = (*moras).Get(l)
+		var moraLen = currentMora.Len()
 		l += moraLen - 1
+		var currentMoras = (*moras)[:l+1]
 		if childTree, ok := currentTree.getChildTree(currentMora); ok {
-			//fmt.Printf("%v-tree is exist. move it. last word is %v.\n", (*currentTree).WordList.String(), currentMora)
+			//fmt.Printf("current mora is %v. %v-tree is exist. move it. \n", *currentMora, currentMoras.String())
 			currentTree = childTree
 		} else {
-			//fmt.Printf("%v-tree is not exist. create and move it. last word is %v.\n", (*currentTree).WordList.String(), currentMora)
-			var nextTree = NewStationTree(currentMoras)
+			//fmt.Printf("current mora is %v. %v-tree is not exist. create and move it. \n", *currentMora, currentMoras.String())
+			var nextTree = NewStationTree(&currentMoras)
 			currentTree.addChildTree(currentMora, nextTree)
 			currentTree = nextTree
 		}
