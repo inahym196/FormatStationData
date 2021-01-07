@@ -12,8 +12,8 @@ import (
 	"strings"
 	"unicode"
 
-	"./src/stationTree"
-	//"github.com/inahym196/FormatStationData/src/stationTree"
+	"github.com/inahym196/FormatStationData/src/stationTree"
+	"github.com/inahym196/gojaconv/jaconv"
 )
 
 func OpenReadFile(filename string) io.ReadCloser {
@@ -90,10 +90,10 @@ func TextToCsv(readfile, writefile string) {
 	for scanner.Scan() {
 		kanji, hira := ExtractText(scanner.Text() /*, gomiFp*/)
 		if kanji != "" {
-			fmt.Fprintf(writeFp, "%v,%v\n", kanji, hira)
-			//vowel := jaconv.ToHebon(hira)
-			//len := len(vowel) //- strings.Count(vowel, "y") - strings.Count(vowel, "t")
-			//fmt.Fprintf(writeFp, "%v,%v,%v,%v\n", kanji, hira, vowel, len)
+			//fmt.Fprintf(writeFp, "%v,%v\n", kanji, hira)
+			vowel := jaconv.ToHebon(hira)
+			len := len(vowel) //- strings.Count(vowel, "y") - strings.Count(vowel, "t")
+			fmt.Fprintf(writeFp, "%v,%v,%v,%v\n", kanji, hira, vowel, len)
 		}
 	}
 }
@@ -133,7 +133,7 @@ func CsvToJson(readfile, writefile string) {
 
 func main() {
 
-	//TextToCsv("src/raw_datalist.txt", "src/datalist.csv")
-	CsvToJson("src/datalist.csv", "src/datalist.json")
+	TextToCsv("raw_datalist.txt", "datalist.csv")
+	//CsvToJson("src/datalist.csv", "src/datalist.json")
 
 }

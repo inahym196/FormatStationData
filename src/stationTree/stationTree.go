@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/inahym196/FormatStationData/src/roma"
-	"github.com/inahym196/FormatStationData/src/word"
+	//"github.com/inahym196/FormatStationData/src/word"
+	"./src/word"
 	"github.com/inahym196/gojaconv/jaconv"
 )
 
@@ -30,6 +31,18 @@ func (tree *StationTree) getChildTree(s string) (*StationTree, bool) {
 	return nil, false
 }
 
+func (tree *StationTree) getWordList() (wl *word.WordList, l int) {
+	var WordListLen = (*tree).WordList.Len()
+	if WordListLen > 0 {
+		return (*tree).WordList, WordListLen
+	}
+	return nil, 0
+}
+
+func (tree *StationTree) getDepth() int {
+	return len((*tree).Vowel)
+}
+
 func NewStationTree(v string) *StationTree {
 	var tree = new(StationTree)
 	tree.Vowel = v
@@ -41,7 +54,7 @@ func NewStationTree(v string) *StationTree {
 /* ===== public func ===== */
 func (tree *StationTree) String() (str string) {
 
-	str = "&StationTree.StationTree::[ChildTree: ["
+	str = "&tree::[ChildTree: ["
 	for i := range (*tree).ChildTree {
 		str += fmt.Sprintf("%v,", i)
 	}
@@ -85,17 +98,23 @@ func (tree *StationTree) GrowTree(record []string) {
 
 }
 
-func (tree *StationTree) SearchLeaf(romas *roma.Romas) (leaf *StationTree, reached bool) {
-	//var totalVowel = ""
-	for i, romasLen := 0, romas.Len(); i < romasLen; i++ {
-		var currentVowel = romas.GetVowel(i)
-		if childTree, ok := tree.getChildTree(currentVowel); ok {
+func (tree *StationTree) SearchLeafWordList(romas *roma.Romas, limit int) (leafWordList *word.WordList) {
+
+	if limit > romas.Len() || 0 > limit {
+		limit = romas.Len()
+	}
+	for i := 0; i < limit; i++ {
+		var searchVowel = romas.GetVowel(i)
+		//fmt.Printf("currentTree: %v\tcurrentVowel: %v\n", tree, searchVowel)
+		if childTree, ok := tree.getChildTree(searchVowel); ok {
 			tree = childTree
+			if wordList, wordListLen := tree.getWordList(); wordListLen > 0 {
+				leafWordList = wordList
+			}
 		} else {
 			fmt.Printf("childTree is not exist. \n")
-			return tree, false
+			return leafWordList
 		}
 	}
-	//tree.Debug()
-	return tree, true
+	return leafWordList
 }

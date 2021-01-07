@@ -5,26 +5,40 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"unicode"
 
+	//"github.com/inahym196/FormatStationData/src/stationTree"
+	"./src/stationTree"
+	"./src/word"
 	"github.com/inahym196/FormatStationData/src/roma"
 	"github.com/inahym196/gojaconv/jaconv"
 )
 
+type wordStore struct {
+	Word word.Word
+	Len  int
+}
+
+func (ws *wordStore) len() int {
+	return len(*ws)
+}
+
+func (ws *wordStore) push(w *word) {
+	WS = wordStore{Word: *w, Len: *w.Len()}
+	*ws = append(*ws, WS)
+}
+
+func (ws *wordStore) pop() (w *word, ok bool) {
+	if *ws.Len() == 0 {
+		return nil, false
+	}
+	var last = *ws.Len() - 1
+	*w = (*ws)[last]
+	*ws = (*ws)[:last]
+	return w, true
+}
+
 /*
-
-	func PushStationList(store *StoredStationList, len int, Word Word.Word) {
-	*store = append(*store, *NewStation(len, Word))
-	}
-
-	func PopStationList(store *StoredStationList) (StoredStation, error) {
-	if len(*store) == 0 {
-		return *NewStation(0, Word.Word{}), errors.New("StoredStationList is empty.\n")
-	}
-	popdata := (*store)[len(*store)-1]
-	*store = (*store)[:len(*store)-1]
-	return popdata, nil
-	}
-
 	func sjis_to_utf8(str string) (string, error) {
 	ret, err := ioutil.ReadAll(transform.NewReader(strings.NewReader(str), japanese.ShiftJIS.NewDecoder()))
 	if err != nil {
@@ -63,7 +77,22 @@ import (
 
 */
 
-func ReadJson(filename string) (jsonData *stationTree.stationTree) {
+func KanaToHira(str string) string {
+	codeDiff := 0x30a1 - 0x3041
+	src := []rune(str)
+	dst := make([]rune, len(src))
+	for i, r := range src {
+		switch {
+		case unicode.In(r, unicode.Katakana):
+			dst[i] = r - rune(codeDiff)
+		default:
+			dst[i] = r
+		}
+	}
+	return string(dst)
+}
+
+func ReadJson(filename string) (jsonData *stationTree.StationTree) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -74,15 +103,38 @@ func ReadJson(filename string) (jsonData *stationTree.stationTree) {
 	return jsonData
 }
 
+func strToRomas(s string) *roma.Romas {
+	return roma.InitRomas(jaconv.ToHebon(KanaToHira(s)))
+}
+
 func main() {
 
-	var RootTree *stationTree.stationTree = ReadJson("src/datalist.json")
-	RootTree.Debug()
-	var inputData = "ちょんだ"
-	var inputRomas = roma.InitRomas(jaconv.ToHebon(inputData))
-	var currentTree, reached = RootTree.SearchLeaf(inputRomas)
+	const stationLenMax int = 25
+
+	var RootTree *stationTree.StationTree = ReadJson("src/datalist.json")
+	var inputData = "オバマ"
+	var romas = strToRomas(inputData)
+	fmt.Printf("input: %s\n", romas)
+	var searchStr string
+	var StoreData *[]wordStore
+	var latterRomas = romas
+	if romas.Len() > stationLenMax {
+		var subRomas = latterRomas.Slice(0, stationLenMax)
+	}
+	var sStart, sEnd = 0, stationLenMax
+	for subRomas.Len() > 0 {
+		var wordList = RootTree.SearchLeafWordList(romas, stationLenMax)
+		if wordList.Len() != 0 {
+			word := wordList.Eval()
+			StoreData.push(word)
+		} else if popWord, ok := StoreData.pop; ok {
+			var tmpRomas = roma.Romas{popWord.Romas}
+			*romas = append(tmp, romas)
+		}
+	}
+
 	//var LeafWordList, matched = currentTree.GetLeafWordList(inputRomas)
-	fmt.Printf("%v\n%v\n", currentTree, reached)
+	fmt.Printf("%v\n%v\n", (*wordList)[0], depth)
 
 	/*
 		var popdata StoredStation
