@@ -3,8 +3,8 @@ package stationTree
 import (
 	"fmt"
 
-	"../roma"
-	"../word"
+	"github.com/inahym196/FormatStationData/src/roma"
+	"github.com/inahym196/FormatStationData/src/word"
 	"github.com/inahym196/gojaconv/jaconv"
 )
 
