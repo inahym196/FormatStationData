@@ -23,6 +23,11 @@ func (ms *Romas) Get(l int) (s string) {
 	return (*ms)[l]
 }
 
+func (ms *Romas) GetVowel(l int) (s string) {
+	s = (*ms)[l]
+	return s[len(s)-1 : len(s)]
+}
+
 func (ms *Romas) Slice(start, end int) (s string) {
 	for ; start < end; start++ {
 		s += (*ms).Get(start)

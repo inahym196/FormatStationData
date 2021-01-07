@@ -56,13 +56,12 @@ func (tree *StationTree) String() (str string) {
 	return str
 }
 
-func (tree *StationTree) MakeLeafTree(romas *roma.Romas) (leaf *StationTree) {
+func (tree *StationTree) MakeLeaf(romas *roma.Romas) (leaf *StationTree) {
 	var currentTree = tree
-	var romasLen = romas.Len()
 	var totalVowel = ""
-	for l := 0; l < romasLen; l++ {
-		var currentRoma = romas.Get(l)
-		var currentVowel = currentRoma[len(currentRoma)-1 : len(currentRoma)]
+	for i, romasLen := 0, romas.Len(); i < romasLen; i++ {
+		var currentRoma = romas.Get(i)
+		var currentVowel = romas.GetVowel(i)
 		totalVowel += currentVowel
 		//var currentRomas = romas.Slice(0, l)
 		if childTree, ok := currentTree.getChildTree(currentVowel); ok {
@@ -82,7 +81,23 @@ func (tree *StationTree) GrowTree(record []string) {
 
 	var word = word.NewWord(record[0], record[1])
 	var romas = roma.InitRomas(jaconv.ToHebon(record[1]))
-	var leaf = (*tree).MakeLeafTree(romas)
+	var leaf = (*tree).MakeLeaf(romas)
 	leaf.addWordList(word)
 
+}
+
+func (tree *StationTree) SearchLeaf(romas *roma.Romas) (leaf *StationTree, reached bool) {
+	var totalVowel = ""
+	for i, romasLen := 0, romas.Len(); i < romasLen; i++ {
+		var currentRoma = romas.Get(i)
+		var currentVowel = romas.GetVowel(i)
+		if childTree, ok := tree.getChildTree(currentVowel); ok {
+			tree = childTree
+		} else {
+			fmt.Printf("childTree is not exist. \n")
+			return tree, false
+		}
+	}
+	//tree.Debug()
+	return tree, true
 }
