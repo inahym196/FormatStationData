@@ -12,8 +12,14 @@ import (
 	"strings"
 	"unicode"
 
+<<<<<<< HEAD
 	"./src/stationTree"
 	//"github.com/inahym196/FormatStationData/src/stationTree"
+=======
+	"./src/struct/StationTree"
+
+	"github.com/inahym196/gojaconv/jaconv"
+>>>>>>> origin/master
 )
 
 func OpenReadFile(filename string) io.ReadCloser {
@@ -90,6 +96,7 @@ func TextToCsv(readfile, writefile string) {
 	for scanner.Scan() {
 		kanji, hira := ExtractText(scanner.Text() /*, gomiFp*/)
 		if kanji != "" {
+<<<<<<< HEAD
 			fmt.Fprintf(writeFp, "%v,%v\n", kanji, hira)
 			//vowel := jaconv.ToHebon(hira)
 			//len := len(vowel) //- strings.Count(vowel, "y") - strings.Count(vowel, "t")
@@ -97,6 +104,15 @@ func TextToCsv(readfile, writefile string) {
 		}
 	}
 }
+=======
+			vowel := jaconv.ToHebon(hira)
+			len := len(vowel) //- strings.Count(vowel, "y") - strings.Count(vowel, "t")
+			fmt.Fprintf(writeFp, "%v,%v,%v,%v\n", kanji, hira, vowel, len)
+		}
+	}
+}
+
+>>>>>>> origin/master
 func CsvToJson(readfile, writefile string) {
 	readFp := OpenReadFile(readfile)
 	defer readFp.Close()
@@ -105,6 +121,7 @@ func CsvToJson(readfile, writefile string) {
 	writeFp := OpenWriteFile(writefile)
 	defer writeFp.Close()
 
+<<<<<<< HEAD
 	var RootTree = stationTree.NewStationTree("")
 	//forStart := 0
 	//forCount := 10000
@@ -112,16 +129,28 @@ func CsvToJson(readfile, writefile string) {
 		record, err := reader.Read()
 		if err == io.EOF {
 			fmt.Printf("EOF")
+=======
+	var RootTree = StationTree.NewStationTree(0, "")
+	for debug := 0; ; /*debug < 10*/ debug++ {
+		record, err := reader.Read()
+		if err == io.EOF {
+>>>>>>> origin/master
 			break
 		}
 		if err != nil {
 			panic(err)
 		}
+<<<<<<< HEAD
 		/*
 			if debug < forStart {
 				continue
 			}
 		*/
+=======
+		if debug < 0 {
+			continue
+		}
+>>>>>>> origin/master
 		RootTree.GrowTree(record)
 	}
 	jsonData, err := json.MarshalIndent(RootTree, "", "  ")
@@ -129,11 +158,22 @@ func CsvToJson(readfile, writefile string) {
 		log.Fatal(err)
 	}
 	fmt.Fprintf(writeFp, "%v", string(jsonData))
+<<<<<<< HEAD
+=======
+
+	//var jsonTest *StationTree.StationTree = ReadJson("datalist.json")
+	//fmt.Printf("%v", jsonTest)
+>>>>>>> origin/master
 }
 
 func main() {
 
+<<<<<<< HEAD
 	//TextToCsv("src/raw_datalist.txt", "src/datalist.csv")
 	CsvToJson("src/datalist.csv", "src/datalist.json")
+=======
+	//TextToCsv("raw_datalist.txt", "datalist.csv")
+	CsvToJson("datalist.csv", "datalist.json")
+>>>>>>> origin/master
 
 }
