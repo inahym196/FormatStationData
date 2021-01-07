@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/inahym196/GoToStation/src/stationTree"
+	"github.com/inahym196/GoToStation/src/word"
 )
 
 type wordStore struct {
