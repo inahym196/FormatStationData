@@ -2,8 +2,8 @@ package word
 
 type WordList []Word
 type Word struct {
-	Kanji string
-	Hira  string
+	Kanji string `json:"Kanji"`
+	Hira  string `json:"Hira"`
 }
 
 /* ===== internal func ===== */

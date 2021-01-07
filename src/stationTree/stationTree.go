@@ -9,9 +9,9 @@ import (
 )
 
 type StationTree struct {
-	Vowel     string
-	WordList  *word.WordList
-	ChildTree map[string]*StationTree
+	Vowel     string                  `json:"Vowel"`
+	WordList  *word.WordList          `json:"WordList"`
+	ChildTree map[string]*StationTree `json:"ChildTree"`
 }
 
 /* ===== internal func ===== */
