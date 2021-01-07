@@ -28,14 +28,14 @@ func (ws *wordStore) push(w *word) {
 	*ws = append(*ws, WS)
 }
 
-func (ws *wordStore) pop() (w *word, ok bool) {
+func (ws *wordStore) pop() (w *word, wordLen int) {
 	if *ws.Len() == 0 {
-		return nil, false
+		return nil, 0
 	}
 	var last = *ws.Len() - 1
 	*w = (*ws)[last]
 	*ws = (*ws)[:last]
-	return w, true
+	return w, (*w).Len()
 }
 
 /*
@@ -123,13 +123,15 @@ func main() {
 	}
 	var sStart, sEnd = 0, stationLenMax
 	for subRomas.Len() > 0 {
-		var wordList = RootTree.SearchLeafWordList(romas, stationLenMax)
+		var wordList = RootTree.SearchLeafWordList(romas, sEnd)
 		if wordList.Len() != 0 {
 			word := wordList.Eval()
 			StoreData.push(word)
-		} else if popWord, ok := StoreData.pop; ok {
-			var tmpRomas = roma.Romas{popWord.Romas}
-			*romas = append(tmp, romas)
+			latterRomas = latterRomas.Slice(wordList.Len():wordList.Len()+stationLenMax)
+			/* ???? */
+		} else if popWord, wordLen := StoreData.pop; wordLen != 0 {
+			romas.InsertBefore(popWord)
+			sEnd = wordLen
 		}
 	}
 
