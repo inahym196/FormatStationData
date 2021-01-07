@@ -12,10 +12,8 @@ import (
 	"strings"
 	"unicode"
 
-	"../src/roma"
-	"../src/stationTree"
-
-	//"github.com/inahym196/FormatStationData/src/stationTree"
+	"github.com/inahym196/FormatStationData/src/roma"
+	"github.com/inahym196/GoToStation/src/stationTree"
 	"github.com/inahym196/gojaconv/jaconv"
 )
 

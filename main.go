@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/inahym196/FormatStationData/src/stationTree"
+	"github.com/inahym196/GoToStation/src/stationTree"
 )
 
 type wordStore struct {

@@ -3,7 +3,7 @@ package word
 import (
 	"unicode"
 
-	"github.com/inahym196/FormatStationData/src/roma"
+	"github.com/inahym196/GoToStation/src/roma"
 	"github.com/inahym196/gojaconv/jaconv"
 )
 
