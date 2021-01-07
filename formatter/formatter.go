@@ -12,7 +12,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/inahym196/FormatStationData/src/stationTree"
+	"../src/roma"
+	"../src/stationTree"
+
+	//"github.com/inahym196/FormatStationData/src/stationTree"
 	"github.com/inahym196/gojaconv/jaconv"
 )
 
@@ -26,7 +29,7 @@ func OpenReadFile(filename string) io.ReadCloser {
 }
 
 func OpenWriteFile(filename string) io.WriteCloser {
-	fp, err := os.OpenFile(filename, os.O_CREATE, 0666)
+	fp, err := os.Create(filename)
 	if err != nil {
 		log.Fatal(err)
 		panic(err)
@@ -90,10 +93,9 @@ func TextToCsv(readfile, writefile string) {
 	for scanner.Scan() {
 		kanji, hira := ExtractText(scanner.Text() /*, gomiFp*/)
 		if kanji != "" {
-			//fmt.Fprintf(writeFp, "%v,%v\n", kanji, hira)
-			vowel := jaconv.ToHebon(hira)
-			len := len(vowel) //- strings.Count(vowel, "y") - strings.Count(vowel, "t")
-			fmt.Fprintf(writeFp, "%v,%v,%v,%v\n", kanji, hira, vowel, len)
+			romas := roma.InitRomas(jaconv.ToHebon(hira))
+			//len := len(romas) //- strings.Count(vowel, "y") - strings.Count(vowel, "t")
+			fmt.Fprintf(writeFp, "%v,%v,%v\n", kanji, hira, romas /*, len*/)
 		}
 	}
 }
@@ -133,7 +135,7 @@ func CsvToJson(readfile, writefile string) {
 
 func main() {
 
-	TextToCsv("raw_datalist.txt", "datalist.csv")
-	//CsvToJson("src/datalist.csv", "src/datalist.json")
+	//TextToCsv("raw_datalist.txt", "datalist.csv")
+	CsvToJson("datalist.csv", "datalist.json")
 
 }

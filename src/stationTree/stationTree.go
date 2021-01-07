@@ -4,8 +4,7 @@ import (
 	"fmt"
 
 	"github.com/inahym196/FormatStationData/src/roma"
-	//"github.com/inahym196/FormatStationData/src/word"
-	"./src/word"
+	"github.com/inahym196/FormatStationData/src/word"
 	"github.com/inahym196/gojaconv/jaconv"
 )
 
@@ -24,7 +23,7 @@ func (tree *StationTree) addWordList(w *word.Word) {
 	(*tree).WordList.Add(w)
 }
 
-func (tree *StationTree) getChildTree(s string) (*StationTree, bool) {
+func (tree *StationTree) GetChildTree(s string) (*StationTree, bool) {
 	if childTree, ok := (*tree).ChildTree[s]; ok {
 		return childTree, true
 	}
@@ -76,7 +75,7 @@ func (tree *StationTree) MakeLeaf(romas *roma.Romas) (leaf *StationTree) {
 		var currentVowel = romas.GetVowel(i)
 		totalVowel += currentVowel
 		//var currentRomas = romas.Slice(0, l)
-		if childTree, ok := currentTree.getChildTree(currentVowel); ok {
+		if childTree, ok := currentTree.GetChildTree(currentVowel); ok {
 			//fmt.Printf("currentRoma=%v,%v-tree !=nil. move it.vowel=%v \n", currentRoma, currentRomas, currentVowel)
 			currentTree = childTree
 		} else {
@@ -100,19 +99,21 @@ func (tree *StationTree) GrowTree(record []string) {
 
 func (tree *StationTree) SearchLeafWordList(romas *roma.Romas, limit int) (leafWordList *word.WordList) {
 
-	if limit > romas.Len() || 0 > limit {
+	if romas == nil {
+		return nil
+	} else if limit > romas.Len() || 0 > limit {
 		limit = romas.Len()
 	}
 	for i := 0; i < limit; i++ {
 		var searchVowel = romas.GetVowel(i)
 		//fmt.Printf("currentTree: %v\tcurrentVowel: %v\n", tree, searchVowel)
-		if childTree, ok := tree.getChildTree(searchVowel); ok {
+		if childTree, ok := tree.GetChildTree(searchVowel); ok {
 			tree = childTree
 			if wordList, wordListLen := tree.getWordList(); wordListLen > 0 {
 				leafWordList = wordList
 			}
 		} else {
-			fmt.Printf("childTree is not exist. \n")
+			//fmt.Printf("SearchLeafWordListFunction::childTree is not exist. \n")
 			return leafWordList
 		}
 	}

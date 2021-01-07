@@ -2,16 +2,17 @@ package roma
 
 import (
 	"fmt"
-
-	//"github.com/inahym196/FormatStationData/src/word"
-	"../src/word"
 )
 
 type Romas []string
 
 /* ===== internal func ===== */
+func newRomas() (rs *Romas) {
+	return &Romas{}
+}
+
 func InitRomas(strArr []string) (rs *Romas) {
-	rs = &Romas{}
+	rs = newRomas()
 	*rs = strArr
 	//fmt.Printf("hebon is %v\n", strArr)
 	return rs
@@ -32,24 +33,40 @@ func (rs *Romas) GetVowel(l int) (s string) {
 }
 
 func (rs *Romas) Slice(start, end int) (RS *Romas) {
+	RS = newRomas()
+	//fmt.Printf("rsLen:%v,end:%v\t", rs.Len(), end)
+	if rs.Len() < end {
+		end = rs.Len()
+	}
+	//fmt.Printf("then, end:%v\n", end)
+	//fmt.Printf("rs:%v\n", rs)
 	for ; start < end; start++ {
+		//fmt.Printf("\trs[%v]=%v\n", start, (*rs).GetAt(start))
 		(*RS).Add((*rs).GetAt(start))
 	}
 	return RS
 }
 
 func (rs *Romas) String() (str string) {
+	if (*rs).Len() == 0 {
+		str = "[no data]"
+	}
 	for _, m := range *rs {
-		str += fmt.Sprintf("%v", m)
+		str += fmt.Sprintf("%v ", m)
 	}
 	return str
 }
 
 func (rs *Romas) Len() int {
+	if rs == nil {
+		return 0
+	}
 	return len(*rs)
 }
 
-func (rs *Romas) InsertBefore(w *word.Word) {
-	romas = (*w).Romas
-	*rs = append(romas, *rs)
+func (rs *Romas) InsertBefore(RS *Romas) {
+	for _, s := range *rs {
+		(*RS).Add(s)
+	}
+	*rs = *RS
 }

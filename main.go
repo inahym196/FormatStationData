@@ -5,13 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"unicode"
 
-	//"github.com/inahym196/FormatStationData/src/stationTree"
-	"./src/stationTree"
-	"./src/word"
-	"github.com/inahym196/FormatStationData/src/roma"
-	"github.com/inahym196/gojaconv/jaconv"
+	"github.com/inahym196/FormatStationData/src/stationTree"
 )
 
 type wordStore struct {
@@ -19,22 +14,32 @@ type wordStore struct {
 	Len  int
 }
 
-func (ws *wordStore) len() int {
-	return len(*ws)
+type wordStoreList []wordStore
+
+func (ws *wordStore) GetWord() (w *word.Word) {
+	return &(*ws).Word
 }
 
-func (ws *wordStore) push(w *word) {
-	WS = wordStore{Word: *w, Len: *w.Len()}
-	*ws = append(*ws, WS)
+func newWordStoreList() (wsl *wordStoreList) {
+	return &wordStoreList{}
 }
 
-func (ws *wordStore) pop() (w *word, wordLen int) {
-	if *ws.Len() == 0 {
+func (wsl *wordStoreList) len() int {
+	return len(*wsl)
+}
+
+func (wsl *wordStoreList) push(w *word.Word) {
+	var WS = wordStore{Word: *w, Len: (*w).Len()}
+	*wsl = append(*wsl, WS)
+}
+
+func (wsl *wordStoreList) pop() (w *word.Word, wordLen int) {
+	if (*wsl).len() == 0 {
 		return nil, 0
 	}
-	var last = *ws.Len() - 1
-	*w = (*ws)[last]
-	*ws = (*ws)[:last]
+	var last = (*wsl).len() - 1
+	w = (*wsl)[last].GetWord()
+	*wsl = (*wsl)[:last]
 	return w, (*w).Len()
 }
 
@@ -77,21 +82,6 @@ func (ws *wordStore) pop() (w *word, wordLen int) {
 
 */
 
-func KanaToHira(str string) string {
-	codeDiff := 0x30a1 - 0x3041
-	src := []rune(str)
-	dst := make([]rune, len(src))
-	for i, r := range src {
-		switch {
-		case unicode.In(r, unicode.Katakana):
-			dst[i] = r - rune(codeDiff)
-		default:
-			dst[i] = r
-		}
-	}
-	return string(dst)
-}
-
 func ReadJson(filename string) (jsonData *stationTree.StationTree) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -103,68 +93,54 @@ func ReadJson(filename string) (jsonData *stationTree.StationTree) {
 	return jsonData
 }
 
-func strToRomas(s string) *roma.Romas {
-	return roma.InitRomas(jaconv.ToHebon(KanaToHira(s)))
-}
-
 func main() {
 
 	const stationLenMax int = 25
 
-	var RootTree *stationTree.StationTree = ReadJson("src/datalist.json")
-	var inputData = "オバマ"
-	var romas = strToRomas(inputData)
+	var RootTree = ReadJson("src/datalist.json")
+	//var child, _ = RootTree.GetChildTree("u")
+	//fmt.Printf("roottree:%v\n", child)
+	var inputData = "きょうのごはんはハンバーグ"
+	var romas = word.StrToRomas(inputData)
 	fmt.Printf("input: %s\n", romas)
-	var searchStr string
-	var StoreData *[]wordStore
-	var latterRomas = romas
-	if romas.Len() > stationLenMax {
-		var subRomas = latterRomas.Slice(0, stationLenMax)
-	}
-	var sStart, sEnd = 0, stationLenMax
-	for subRomas.Len() > 0 {
-		var wordList = RootTree.SearchLeafWordList(romas, sEnd)
-		if wordList.Len() != 0 {
+	//var searchStr string
+	var StoreData = newWordStoreList()
+	var latterRomas, subRomas = romas, romas
+	var sStart, sCount = 0, stationLenMax
+
+	for latterRomas.Len() > 0 {
+		if latterRomas.Len() > stationLenMax {
+			subRomas = latterRomas.Slice(0, stationLenMax)
+		} else if latterRomas.GetAt(0) == "-" {
+			subRomas = latterRomas.Slice(1, stationLenMax)
+		} else {
+			subRomas = latterRomas
+		}
+		fmt.Printf("Search:[%v],Count:[%v]\n==========\n", subRomas, sCount)
+		var wordList = RootTree.SearchLeafWordList(subRomas, sCount)
+		if wordList != nil {
+			sCount = stationLenMax
 			word := wordList.Eval()
+			fmt.Printf("matched. select word: %v\n", word)
+			wordLen := word.Len()
 			StoreData.push(word)
-			latterRomas = latterRomas.Slice(wordList.Len():wordList.Len()+stationLenMax)
-			/* ???? */
-		} else if popWord, wordLen := StoreData.pop; wordLen != 0 {
-			romas.InsertBefore(popWord)
-			sEnd = wordLen
+			fmt.Printf("StoreData: %v\t", StoreData)
+			fmt.Printf("sCount:%v\n", sCount)
+			fmt.Printf("latterRomas: %v [%v:%v]=>", latterRomas, wordLen, wordLen+sCount)
+			latterRomas = latterRomas.Slice(wordLen, wordLen+sCount)
+			fmt.Printf("%v\n", latterRomas)
+			sStart += wordLen
+		} else if popWord, wordLen := (*StoreData).pop(); wordLen != 0 {
+			fmt.Printf("Popped.\nlatterRomas: %v =>", latterRomas)
+			latterRomas.InsertBefore(popWord.GetRomas())
+			fmt.Printf("%v\n", latterRomas)
+			sStart -= wordLen
+			sCount = wordLen - 1
+		} else {
+			//fmt.Printf("word[%v] couldn't find even thought popped it.", latterRomas)
+			break
 		}
 	}
-
-	//var LeafWordList, matched = currentTree.GetLeafWordList(inputRomas)
-	fmt.Printf("%v\n%v\n", (*wordList)[0], depth)
-
-	/*
-		var popdata StoredStation
-		var StoredStationList StoredStationList
-		tmp := "まんがよむならぶっくらいぶ"
-		tmp = jaconv.ToHebon(tmp)
-		print(tmp)
-		itr_start, itr_end := 0, len(tmp)
-
-		for i := 5; len(tmp) != itr_start && i > 0; i-- {
-			matchLen, matchWord, err := WordSearch(tmp[itr_start:itr_end], jsonData)
-			if err != nil {
-				fmt.Printf("%v\n", err)
-			}
-			if matchLen != 0 {
-				PushStationList(&StoredStationList, matchLen, matchWord)
-				itr_start += matchLen
-			} else if len(StoredStationList) > 0 {
-				popdata, err = PopStationList(&StoredStationList)
-				if err != nil {
-					fmt.Println(err)
-				}
-				itr_start -= popdata.Len
-			} else {
-				break
-			}
-			fmt.Printf("%v\n", StoredStationList)
-		}
-	*/
+	fmt.Printf("Search Complate.StoreData:%v\n\t", StoreData)
 
 }
