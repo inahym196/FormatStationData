@@ -60,7 +60,6 @@ func (tree *StationTree) MakeLeaf(romas *roma.Romas) (leaf *StationTree) {
 	var currentTree = tree
 	var totalVowel = ""
 	for i, romasLen := 0, romas.Len(); i < romasLen; i++ {
-		var currentRoma = romas.Get(i)
 		var currentVowel = romas.GetVowel(i)
 		totalVowel += currentVowel
 		//var currentRomas = romas.Slice(0, l)
@@ -87,9 +86,8 @@ func (tree *StationTree) GrowTree(record []string) {
 }
 
 func (tree *StationTree) SearchLeaf(romas *roma.Romas) (leaf *StationTree, reached bool) {
-	var totalVowel = ""
+	//var totalVowel = ""
 	for i, romasLen := 0, romas.Len(); i < romasLen; i++ {
-		var currentRoma = romas.Get(i)
 		var currentVowel = romas.GetVowel(i)
 		if childTree, ok := tree.getChildTree(currentVowel); ok {
 			tree = childTree
