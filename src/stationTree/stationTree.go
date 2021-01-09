@@ -3,10 +3,60 @@ package stationTree
 import (
 	"fmt"
 
-	"github.com/inahym196/GoToStation/src/roma"
-	"github.com/inahym196/GoToStation/src/word"
+	//"github.com/inahym196/GoToStation/src/roma"
+	//"github.com/inahym196/GoToStation/src/word"
 	"github.com/inahym196/gojaconv/jaconv"
+
+	"../roma"
+	"../word"
 )
+
+func Search(s string) (ws *wordStore.wordStore) {
+	var romas = word.StrToRomas(s)
+	return &wordStore.wordStore{}
+}
+
+/*
+func SearchStation(tree *stationTree.StationTree) (StoreData *wordStore) {
+
+	var latterRomas, subRomas = romas, romas
+	var sStart, sCount = 0, stationLenMax
+
+	for latterRomas.Len() > 0 {
+		if latterRomas.Len() > stationLenMax {
+			subRomas = latterRomas.Slice(0, stationLenMax)
+		} else if latterRomas.GetAt(0) == "-" {
+			subRomas = latterRomas.Slice(1, stationLenMax)
+		} else {
+			subRomas = latterRomas
+		}
+		fmt.Printf("Search:[%v],Count:[%v]\n==========\n", subRomas, sCount)
+		var wordList = tree.SearchLeafWordList(subRomas, sCount)
+		if wordList != nil {
+			sCount = stationLenMax
+			word := wordList.Eval()
+			fmt.Printf("matched. select word: %v\n", word)
+			wordLen := word.Len()
+			StoreData.push(word)
+			fmt.Printf("StoreData: %v\t", StoreData)
+			fmt.Printf("sCount:%v\n", sCount)
+			fmt.Printf("latterRomas: %v [%v:%v]=>", latterRomas, wordLen, wordLen+sCount)
+			latterRomas = latterRomas.Slice(wordLen, wordLen+sCount)
+			fmt.Printf("%v\n", latterRomas)
+			sStart += wordLen
+		} else if popWord, wordLen := (*StoreData).pop(); wordLen != 0 {
+			fmt.Printf("Popped.\nlatterRomas: %v =>", latterRomas)
+			latterRomas.InsertBefore(popWord.GetRomas())
+			fmt.Printf("%v\n", latterRomas)
+			sStart -= wordLen
+			sCount = wordLen - 1
+		} else {
+			//fmt.Printf("word[%v] couldn't find even thought popped it.", latterRomas)
+			break
+		}
+	}
+}
+*/
 
 type StationTree struct {
 	Vowel     string                  `json:"Vowel"`
@@ -68,7 +118,7 @@ func (tree *StationTree) String() (str string) {
 	return str
 }
 
-func (tree *StationTree) MakeLeaf(romas *roma.Romas) (leaf *StationTree) {
+func (tree *StationTree) makeLeaf(romas *roma.Romas) (leaf *StationTree) {
 	var currentTree = tree
 	var totalVowel = ""
 	for i, romasLen := 0, romas.Len(); i < romasLen; i++ {
@@ -92,7 +142,7 @@ func (tree *StationTree) GrowTree(record []string) {
 
 	var word = word.NewWord(record[0], record[1])
 	var romas = roma.InitRomas(jaconv.ToHebon(record[1]))
-	var leaf = (*tree).MakeLeaf(romas)
+	var leaf = (*tree).makeLeaf(romas)
 	leaf.addWordList(word)
 
 }
