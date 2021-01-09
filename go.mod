@@ -1,4 +1,4 @@
-module GoToStation
+module github.com/inahym196/GoToStation
 
 go 1.15
 

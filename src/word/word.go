@@ -16,9 +16,6 @@ type Word struct {
 }
 
 /* ===== internal func ===== */
-func hogehoge() {
-
-}
 
 /* ===== public func ===== */
 func KanaToHira(str string) string {
