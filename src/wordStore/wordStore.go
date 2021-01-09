@@ -1,7 +1,7 @@
 package wordStore
 
 import (
-	"../src/word"
+	"GoToStation/src/word"
 )
 
 type wordStore struct {

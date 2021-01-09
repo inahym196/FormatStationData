@@ -3,8 +3,8 @@ package word
 import (
 	"unicode"
 
-	"../src/roma"
-	//"github.com/inahym196/GoToStation/src/roma"
+	"GoToStation/src/roma"
+
 	"github.com/inahym196/gojaconv/jaconv"
 )
 

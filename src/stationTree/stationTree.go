@@ -1,14 +1,11 @@
 package stationTree
 
 import (
+	"GoToStation/src/roma"
+	"GoToStation/src/word"
 	"fmt"
 
-	//"github.com/inahym196/GoToStation/src/roma"
-	//"github.com/inahym196/GoToStation/src/word"
 	"github.com/inahym196/gojaconv/jaconv"
-
-	"../roma"
-	"../word"
 )
 
 func Search(s string) (ws *wordStore.wordStore) {

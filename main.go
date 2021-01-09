@@ -1,14 +1,12 @@
 package main
 
 import (
+	"GoToStation/src/stationTree"
+	"GoToStation/src/word"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-
-	//"github.com/inahym196/GoToStation/src/stationTree"
-	//"github.com/inahym196/GoToStation/src/word"
-	"./src/stationTree"
 )
 
 /*
